@@ -12,6 +12,7 @@ Installation
 ============
 
 '''bash
+
 	$ git clone https://github.com/cnshawncao/zabbix-module-ipvs.git
 	$ cp -r zabbix-module-ipvs zabbix-x.x.x/src/modules/	# zabbix-x.x.x is zabbix version
 '''
@@ -46,4 +47,5 @@ Synopsis
                 ......}]}
     
 **key:** *ipvs.activeconns[IPVSPTL,IPVSVIP,IPVSVPORT,IPVSRS,IPVSRSPORT]*
+
 **key:** *ipvs.inactconns[IPVSPTL,IPVSVIP,IPVSVPORT,IPVSRS,IPVSRSPORT]*
