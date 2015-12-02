@@ -11,11 +11,11 @@ This module is production ready.
 Installation
 ============
 
-'''bash
+```bash
 
 	$ git clone https://github.com/cnshawncao/zabbix-module-ipvs.git
 	$ cp -r zabbix-module-ipvs zabbix-x.x.x/src/modules/	# zabbix-x.x.x is zabbix version
-'''
+```
 
 1. run 'make' to build it. It should produce lvs.so.
 
