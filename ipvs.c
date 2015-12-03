@@ -486,9 +486,9 @@ int	zbx_module_ipvs_hash_table_size(AGENT_REQUEST *request, AGENT_RESULT *result
 			}
 		}
 		else
-        {
-            SET_MSG_RESULT(result, zbx_strdup(NULL, "Can't get first line"));
-        }
+		{
+			SET_MSG_RESULT(result, zbx_strdup(NULL, "Can't get first line"));
+		}
 		zbx_fclose(f);
 	}
 	else
