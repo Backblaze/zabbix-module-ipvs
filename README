@@ -1,0 +1,18 @@
+This directory contains a sample module, which extends functionality of Zabbix
+ Agent. 
+
+Run 'make' to build it. It should produce lvs.so.
+
+Using:
+
+1. copy lvs.so to the module directory, like LoadModulePath=/etc/zabbix/modules
+
+2. change config file add line : LoadModule=lvs.so
+
+3. restart zabbix_agent daemon
+    
+key: ipvs.stats[cps]
+key: ipvs.stats[inpps]
+key: ipvs.stats[outpps]
+key: ipvs.stats[inbps]
+key: ipvs.stats[outbps]

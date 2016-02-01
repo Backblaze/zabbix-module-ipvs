@@ -31,21 +31,9 @@ Synopsis
 ========
 
 **key:** *ipvs.discovery*
+**key:** *ipvs.stats[cps]*
+**key:** ipvs.stats[inpps]*
+**key:** ipvs.stats[outpps]*
+**key:** ipvs.stats[inbps]*
+**key:** ipvs.stats[outbps]*
 
-**value:**
-
-    {
-        "data":[
-            {
-                "{#IPVSPTL}":"Protocol",
-                "{#IPVSVIP}":"IPVS VIP",
-                "{#IPVSVPORT}":"IPVS VPORT",
-                "{#IPVSRS}":"IPVS RealServer",
-                "{#IPVSRSPORT}":"IPVS RealServer Port"},
-            {
-                ......
-                ......}]}
-    
-**key:** *ipvs.activeconns[IPVSPTL,IPVSVIP,IPVSVPORT,IPVSRS,IPVSRSPORT]*
-
-**key:** *ipvs.inactconns[IPVSPTL,IPVSVIP,IPVSVPORT,IPVSRS,IPVSRSPORT]*
