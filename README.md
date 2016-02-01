@@ -30,8 +30,6 @@ Installation
 Synopsis
 ========
 
-**key:** *ipvs.discovery*
-
 **key:** *ipvs.stats[cps]*
 
 **key:** *ipvs.stats[inpps]*
