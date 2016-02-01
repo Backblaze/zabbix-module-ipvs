@@ -31,9 +31,13 @@ Synopsis
 ========
 
 **key:** *ipvs.discovery*
-**key:** *ipvs.stats[cps]*
-**key:** ipvs.stats[inpps]*
-**key:** ipvs.stats[outpps]*
-**key:** ipvs.stats[inbps]*
-**key:** ipvs.stats[outbps]*
 
+**key:** *ipvs.stats[cps]*
+
+**key:** *ipvs.stats[inpps]*
+
+**key:** *ipvs.stats[outpps]*
+
+**key:** *ipvs.stats[inbps]*
+
+**key:** *ipvs.stats[outbps]*
