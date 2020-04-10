@@ -32,11 +32,13 @@
 static int	item_timeout = 0;
 
 int	zbx_module_ipvs_stats(AGENT_REQUEST *request, AGENT_RESULT *result);
+int zbx_module_ipvs_vip_discovery(AGENT_REQUEST *request, AGENT_RESULT *result);
 
 static	ZBX_METRIC keys[] =
 /*	KEY                     FLAG			FUNCTION			TEST PARAMETERS */
 {
 	{"ipvs.stats",		CF_HAVEPARAMS,		zbx_module_ipvs_stats,		NULL},
+	{"ipvs.vipdiscovery",	0,	zbx_module_ipvs_vip_discovery,	NULL},
 	{NULL}
 };
 
@@ -83,6 +85,61 @@ ZBX_METRIC	*zbx_module_item_list()
 	return keys;
 }
 
+
+int	zbx_module_ipvs_vip_discovery(AGENT_REQUEST *request, AGENT_RESULT *result)
+{
+	int	ret = SYSINFO_RET_FAIL;
+	char line[MAX_STRING_LEN];
+	FILE	*f;
+
+
+	if (NULL != (f = fopen("/proc/net/ip_vs", "r")))
+	{
+		char *buffer = (char *)malloc(sizeof(char)*2);
+		zbx_strlcpy(buffer, "[", 2);
+		int vipcount=0;
+		while (NULL != fgets(line, sizeof(line), f))
+		{
+			if (0 == strncmp(line, "TCP", 3) || 0 == strncmp(line, "UDP", 3))
+			{
+				// VIP definition line, add it to the list
+				unsigned int ip_int;
+				unsigned int port_int = 0;
+				char dottedquad_ip_port[22];
+				char tempbuff [sizeof(dottedquad_ip_port) + sizeof(char)*15];
+				sscanf(line, "%*s %x:%x %*s", &ip_int, &port_int);
+				zbx_snprintf(dottedquad_ip_port,sizeof(dottedquad_ip_port), "%d.%d.%d.%d:%d", ip_int >> 24, (ip_int >> 16) & 0xFF, (ip_int >> 8) & 0xFF, ip_int & 0xFF, port_int);
+				if (vipcount==0) {
+					zbx_snprintf(tempbuff, sizeof(tempbuff), "{\"{#VIP}\":\"%s\"}", dottedquad_ip_port);
+				}
+				else
+				{
+					zbx_snprintf(tempbuff, sizeof(tempbuff), ",{\"{#VIP}\":\"%s\"}", dottedquad_ip_port);
+				}
+				buffer = (char*)realloc(buffer, sizeof(char)*(strlen(buffer) + strlen(tempbuff) + 1));
+				strcat(buffer, tempbuff);
+				vipcount++;
+			}
+			else
+			{
+				// only care about VIPs for discovery, ignore all other lines
+				continue;
+			}
+		}
+		buffer = (char*)realloc(buffer, sizeof(char)*(strlen(buffer) + 2));
+		strcat(buffer, "]");
+		SET_STR_RESULT(result, strdup(buffer));
+		free(buffer);
+		zbx_fclose(f);
+		ret = SYSINFO_RET_OK;
+	}
+	else
+	{
+		SET_MSG_RESULT(result, zbx_strdup(NULL, "Parse proc file failed"));
+	}
+
+	return ret;
+}
 int	zbx_module_ipvs_stats(AGENT_REQUEST *request, AGENT_RESULT *result)
 {
 	int	ret = SYSINFO_RET_FAIL;
