@@ -96,7 +96,7 @@ int	zbx_module_ipvs_vip_discovery(AGENT_REQUEST *request, AGENT_RESULT *result)
 	if (NULL != (f = fopen("/proc/net/ip_vs", "r")))
 	{
 		char *buffer = (char *)malloc(sizeof(char)*2);
-		zbx_strlcpy(buffer, "[", 2);
+		zbx_strlcpy(buffer, "{\"data\":[", 10);
 		int vipcount=0;
 		while (NULL != fgets(line, sizeof(line), f))
 		{
@@ -126,8 +126,8 @@ int	zbx_module_ipvs_vip_discovery(AGENT_REQUEST *request, AGENT_RESULT *result)
 				continue;
 			}
 		}
-		buffer = (char*)realloc(buffer, sizeof(char)*(strlen(buffer) + 2));
-		strcat(buffer, "]");
+		buffer = (char*)realloc(buffer, sizeof(char)*(strlen(buffer) + 3));
+		strcat(buffer, "]}");
 		SET_STR_RESULT(result, strdup(buffer));
 		free(buffer);
 		zbx_fclose(f);
