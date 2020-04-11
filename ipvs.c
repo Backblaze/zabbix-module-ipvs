@@ -33,12 +33,14 @@ static int	item_timeout = 0;
 
 int	zbx_module_ipvs_stats(AGENT_REQUEST *request, AGENT_RESULT *result);
 int zbx_module_ipvs_vip_discovery(AGENT_REQUEST *request, AGENT_RESULT *result);
+int zbx_module_ipvs_vip_conns(AGENT_REQUEST *request, AGENT_RESULT *result);
 
 static	ZBX_METRIC keys[] =
 /*	KEY                     FLAG			FUNCTION			TEST PARAMETERS */
 {
 	{"ipvs.stats",		CF_HAVEPARAMS,		zbx_module_ipvs_stats,		NULL},
 	{"ipvs.vipdiscovery",	0,	zbx_module_ipvs_vip_discovery,	NULL},
+	{"ipvs.vipconns",	CF_HAVEPARAMS,		zbx_module_ipvs_vip_conns,	NULL},
 	{NULL}
 };
 
@@ -85,7 +87,77 @@ ZBX_METRIC	*zbx_module_item_list()
 	return keys;
 }
 
+int zbx_module_ipvs_vip_conns(AGENT_REQUEST *request, AGENT_RESULT *result)
+{
+	int	ret = SYSINFO_RET_FAIL;
+	char line[MAX_STRING_LEN];
+	FILE	*f;
+	int vip_matches = 0;
+	char *vipstring;
+	unsigned int total_conns = 0;
+	unsigned int requested_ip_int;
+	unsigned int requested_port_int;
+	unsigned int quad1, quad2, quad3, quad4;
 
+	if (request->nparam != 1)
+	{
+		/* set optional error message */
+		SET_MSG_RESULT(result, strdup("Invalid number of parameters"));
+		return ret;
+	}
+
+	vipstring = get_rparam(request, 0);
+	sscanf(vipstring, "%u.%u.%u.%u:%u", &quad1,&quad2,&quad3,&quad4,&requested_port_int);
+	requested_ip_int = (quad1 << 24) + (quad2 << 16) + (quad3 << 8) + quad4;
+
+	if (NULL != (f = fopen("/proc/net/ip_vs", "r")))
+	{
+		while (NULL != fgets(line, sizeof(line), f))
+		{
+			//TODO: actually find our VIP and parse out connections
+			if (0 == strncmp(line, "IP Virtual Server", 18) || 0 == strncmp(line, "Prot LocalAddress:Port", 23) || 0 == strncmp(line, "  -> RemoteAddress:Port", 24))
+			{
+				zabbix_log(LOG_LEVEL_WARNING,"Skipping line: %s", line);
+				continue;
+			}
+			if (0 == strncmp(line, "TCP", 3) || 0 == strncmp(line, "UDP", 3))
+			{
+				zabbix_log(LOG_LEVEL_WARNING,"Found VIP line: %s", line);
+				unsigned int line_ip_int;
+				unsigned int line_port_int;
+				sscanf(line, "%*s %x:%x %*s", &line_ip_int, &line_port_int);
+				if (requested_ip_int == line_ip_int && requested_port_int == line_port_int)
+				{
+					zabbix_log(LOG_LEVEL_WARNING,"VIP line matches");
+					vip_matches = 1;
+					continue;
+				}
+				else
+				{
+					zabbix_log(LOG_LEVEL_WARNING,"VIP line does not match");
+					vip_matches = 0;
+					continue;
+				}
+			}
+			if (1 == vip_matches && 0 == strncmp(line, "  -> ", 5))
+			{
+				zabbix_log(LOG_LEVEL_WARNING,"Found server line for matching VIP");
+				int activeconns = 0;
+				sscanf(line,"%*s %*s %*s %*s %u", &activeconns);
+				total_conns += activeconns;
+				ret = SYSINFO_RET_OK;
+			}
+		}
+		SET_UI64_RESULT(result, (zbx_uint64_t)total_conns);
+		zbx_fclose(f);
+	}
+	else
+	{
+		SET_MSG_RESULT(result, zbx_strdup(NULL, "Reading /proc/net/ip_vs failed"));
+	}
+	return ret;
+
+}
 int	zbx_module_ipvs_vip_discovery(AGENT_REQUEST *request, AGENT_RESULT *result)
 {
 	int	ret = SYSINFO_RET_FAIL;
@@ -135,7 +207,7 @@ int	zbx_module_ipvs_vip_discovery(AGENT_REQUEST *request, AGENT_RESULT *result)
 	}
 	else
 	{
-		SET_MSG_RESULT(result, zbx_strdup(NULL, "Parse proc file failed"));
+		SET_MSG_RESULT(result, zbx_strdup(NULL, "Reading /proc/net/ip_vs failed"));
 	}
 
 	return ret;
