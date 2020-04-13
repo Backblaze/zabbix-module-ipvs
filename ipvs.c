@@ -147,6 +147,11 @@ int zbx_module_ipvs_vip_conns(AGENT_REQUEST *request, AGENT_RESULT *result)
 				total_conns += activeconns;
 				ret = SYSINFO_RET_OK;
 			}
+			if (0 != strncmp(line, "  -> ", 5))
+			{
+				// VIP line of unknown type
+				vip_matches = 0;
+			}
 		}
 		SET_UI64_RESULT(result, (zbx_uint64_t)total_conns);
 		zbx_fclose(f);
@@ -167,7 +172,7 @@ int	zbx_module_ipvs_vip_discovery(AGENT_REQUEST *request, AGENT_RESULT *result)
 
 	if (NULL != (f = fopen("/proc/net/ip_vs", "r")))
 	{
-		char *buffer = (char *)malloc(sizeof(char)*2);
+		char *buffer = (char *)malloc(sizeof(char)*10);
 		zbx_strlcpy(buffer, "{\"data\":[", 10);
 		int vipcount=0;
 		while (NULL != fgets(line, sizeof(line), f))
