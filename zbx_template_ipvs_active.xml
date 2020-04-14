@@ -239,7 +239,7 @@
                     <logtimefmt/>
                 </item>
             </items>
-                      <discovery_rules>
+            <discovery_rules>
                 <discovery_rule>
                     <name>Discovered VIPs</name>
                     <type>0</type>
@@ -256,6 +256,7 @@
                     <snmpv3_authpassphrase/>
                     <snmpv3_privprotocol>0</snmpv3_privprotocol>
                     <snmpv3_privpassphrase/>
+                    <delay_flex/>
                     <params/>
                     <ipmi_sensor/>
                     <authtype>0</authtype>
@@ -276,15 +277,20 @@
                             <name>Conns - $1</name>
                             <type>0</type>
                             <snmp_community/>
+                            <multiplier>1</multiplier>
                             <snmp_oid/>
                             <key>ipvs.vipconns[{#VIP}]</key>
                             <delay>1m</delay>
-                            <history>1d</history>
-                            <trends>365d</trends>
+                            <history>1</history>
+                            <trends>365</trends>
                             <status>0</status>
                             <value_type>3</value_type>
                             <allowed_hosts/>
                             <units>connections</units>
+                            <delta>0</delta>
+                            <formula>1</formula>
+                            <delay_flex/>
+                            <data_type>0</data_type>
                             <snmpv3_contextname/>
                             <snmpv3_securityname/>
                             <snmpv3_securitylevel>0</snmpv3_securitylevel>
@@ -305,18 +311,11 @@
                             <applications/>
                             <valuemap/>
                             <logtimefmt/>
-                            <preprocessing/>
-                            <jmx_endpoint/>
-                            <application_prototypes/>
-                            <master_item_prototype/>
-                            <interface_ref>if1</interface_ref>
                         </item_prototype>
                     </item_prototypes>
                     <trigger_prototypes/>
                     <graph_prototypes/>
                     <host_prototypes/>
-                    <jmx_endpoint/>
-                    <interface_ref>if1</interface_ref>
                 </discovery_rule>
             </discovery_rules>
             <macros/>
